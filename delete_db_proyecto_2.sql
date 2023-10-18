@@ -68,3 +68,38 @@ drop table soporte;
 
 --MODIFICACION CAMPO DE SOPORTE A TIPO DE SOPORTE
 alter table expediente rename column id_soporte to id_tipo_soporte;
+
+
+--TABLA CLIENTE
+create table cliente(
+    id SERIAL,
+    id_usuario integer,
+    fecha_creacion date,
+    primary key (id)
+);
+
+alter table cliente
+add constraint cliente_id_usuario_fkey foreign key (id_usuario)
+references usuario (id) match simple;
+
+alter table solicitud_muestra_medica
+add constraint solicitud_muestra_medica_id_cliente_fkey foreign key (id_cliente)
+references cliente (id) match simple;
+
+
+--TABLA EMPLEADOS
+create table empleado (
+    id SERIAL,
+    id_rol integer,
+    id_usuario integer,
+    primary key (id)
+);
+
+--FKEY EMPLEADOS
+alter table empleado
+add constraint empleado_id_rol_fkey foreign key (id_rol)
+references rol (id) match simple;
+
+alter table empleado
+add constraint empleado_id_usuario_fkey foreign key (id_usuario)
+references usuario (id) match simple;

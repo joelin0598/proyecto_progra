@@ -59,6 +59,7 @@ create table tipo_solicitante(
 );
 
 --CATALOGO PRIVILEGIOS
+--PENDIENTE INTERRELACION
 create table privilegios(
 	id SERIAL,
 	nombre varchar(50) not null, 
@@ -96,8 +97,10 @@ create table expediente (
 --TABLA USUARIO
 create table usuario (
 	id SERIAL,
-	id_rol integer,
-	id_expediente integer,
+    --SIN TABLA CATALOGO, POR DEFAULT 1 Y ROL CORRESPONDE A USUARIO INTERNO 2.1,2.2 ETC
+    id_tipo_usuario integer default 1,
+	id_rol integer null,
+	id_expediente integer unique null,
 	nombres varchar(255) not null,
 	apellidos varchar(255) not null,
 	email varchar(255) not null,
@@ -107,27 +110,21 @@ create table usuario (
 	primary key (id)
 );
 
+
 --FKEY ENTRE USUARIO Y EXPEDIENTE
 alter table usuario 
 add constraint usuario_id_expediente_fkey foreign key (id_expediente)
 references expediente (id) match simple;
 
---TABLA CLIENTE
-create table cliente(
-	id SERIAL,
-	id_usuario integer,
-	fecha_creacion date,
-	primary key (id)
-);
-
-alter table cliente
-add constraint cliente_id_usuario_fkey foreign key (id_usuario)
-references usuario (id) match simple;
+--FKEY EN TABLA USUARIO POR RELACION CON ROL
+alter table usuario
+add constraint usuario_id_rol_fkey foreign key (id_rol)
+references rol (id) match simple;
 
 create table solicitud_muestra_medica (
 	id SERIAL,
-	id_cliente integer not null,
-	id_tipo_solicitante integer not null,
+    id_usuario integer,
+	id_tipo_solicitante integer default 1,
 	id_tipo_solicitud integer not null,
 	id_estado_solicitud integer null,
 	descripcion_solicitud_muestra_medica varchar(2000) null,
@@ -136,10 +133,9 @@ create table solicitud_muestra_medica (
 	primary key (id)
 );
 
-
 alter table solicitud_muestra_medica
-add constraint solicitud_muestra_medica_id_cliente_fkey foreign key (id_cliente)
-references cliente (id) match simple;
+add constraint solicitud_muestra_medica_id_usuario_fkey foreign key (id_usuario)
+references usuario (id) match simple;
 
 alter table solicitud_muestra_medica
 add constraint solicitud_muestra_medica_id_tipo_solicitante_fkey foreign key (id_tipo_solicitante)
@@ -286,23 +282,6 @@ alter table documento_analisis
 add constraint documento_analisis_id_muestra_medica_fkey foreign key (id_muestra_medica)
 references muestra_medica (id) match simple;
 
---TABLA EMPLEADOS
-create table empleado (
-	id SERIAL,
-	id_rol integer,
-	id_usuario integer,
-	primary key (id)
-);
-
---FKEY EMPLEADOS
-alter table empleado
-add constraint empleado_id_rol_fkey foreign key (id_rol)
-references rol (id) match simple;
-
-alter table empleado
-add constraint empleado_id_usuario_fkey foreign key (id_usuario)
-references usuario (id) match simple;
-
 --create table bitacora
 
 --INGRESO DE DATOS A CATOLOGO DE TIPO DE SOPORTE
@@ -327,3 +306,12 @@ values
 insert into usuario (id_expediente,nombres,apellidos,email,genero,telefono,password)
 values
 (1,'Jonathan','Guamuch','joelmorales0598@gmail.com','Masculino','46740797','prueba123');
+
+--INGRESO DE DATOS A CATOLOGO DE ROL
+insert into rol(nombre, descripcion,fecha_creacion,creado_por)
+values
+    ('REV','Revisor','2023-10-18 22:30:00','Jonathan'),
+    ('TEC','Tecnico','2023-10-18 22:30:00','Jonathan'),
+    ('CEN','Centralizador','2023-10-18 22:30:00','Jonathan'),
+    ('ALT','Analista','2023-10-18 22:30:00','Jonathan"');
+
